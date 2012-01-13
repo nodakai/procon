@@ -10,7 +10,8 @@ def main(args):
 
     mod_name = "chal" + args[0]
     mod = __import__(mod_name)
-    print "%s.run(%r) => %s" % (mod_name, args[1:], mod.run(*args[1:]))
+    print "%s.run(%s) =>\n%r" % (mod_name,
+        ", ".join(repr(s) for s in args[1:]), mod.run(*args[1:]))
 
 if __name__ == '__main__':
     main(sys.argv[1:])
