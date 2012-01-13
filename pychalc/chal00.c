@@ -1,4 +1,7 @@
 #include <Python.h>
+#include "chalno.h"
+
+#define CHAL_NO 00
 
 static PyObject *
 run(PyObject *self, PyObject *args)
@@ -22,12 +25,12 @@ run(PyObject *self, PyObject *args)
 }
 
 static PyMethodDef meth_tab[] = {
-    {"run",  run, METH_NOARGS, "chal00.run : void -> int"},
+    {"run",  run, METH_NOARGS, "chal" CHAL_NO_S ".run : void -> int"},
     {} /* Sentinel */
 };
 
 PyMODINIT_FUNC
-initchal00(void)
+MAC_CONCAT(initchal, CHAL_NO)(void)
 {
-    (void) Py_InitModule("chal00", meth_tab);
+    (void) Py_InitModule("chal" CHAL_NO_S, meth_tab);
 }
