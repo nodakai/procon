@@ -28,10 +28,31 @@ let euler0003() =
                 arr.[i] <- true
     Array.findIndexBack not arr
 
+let parind x =
+    let nDigits = log10 <| double x |> ceil |> int
+                
+    let get i =
+        let a = pown 10 i
+        let b = a * 10
+        let q = x % b
+        let r = q / a
+        r
+    seq { for i in 0 .. nDigits / 2 - (nDigits % 2) do yield i } |> Seq.forall (fun i -> get i = get (nDigits - i - 1))
+
+let euler0004() =
+    seq {
+        for i in 2 .. 999 do
+            for j in 1 .. i do
+                let p = i * j
+                if parind p then
+                    yield p
+    } |> Seq.max
+
 let funcs = dict [
     "1", euler0001;
     "2", euler0002;
     "3", euler0003;
+    "4", euler0004;
 ]
 
 [<Xunit.Fact>]
@@ -39,6 +60,7 @@ let testMain() =
     test <@ funcs.["1"]() = 233168 @>
     test <@ funcs.["2"]() = 4613732 @>
     test <@ funcs.["3"]() = 6857 @>
+    test <@ funcs.["4"]() = 906609 @>
 
 [<EntryPoint>]
 let main argv =
