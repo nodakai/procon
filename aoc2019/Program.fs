@@ -14,24 +14,18 @@ let rec calc2 tot f =
     let ff = calc1 f
     calc2 (tot + f) ff
 
-let test2() =
+let test1'() =
     printfn "%d %d" (calc1 1969 |> calc2 0) (calc1 100756 |> calc2 0)
 
-let solve2() =
+let solve1'() =
     IO.File.ReadAllLines "1.in.txt" |> Seq.map int |> Seq.sumBy (calc1 >> calc2 0)
 
-let solve n =
-    match n with
-    | 1 -> solve1()
-    | 2 -> solve2()
-    | _ -> failwithf "problem #%d not solved yet" n
-    |> printfn "%d"
+let solve2() =
+    // use strm = new IO.StreamReader(1y)
+    0
 
-let test n =
-    match n with
-    | 1 -> test1()
-    | 2 -> test2()
-    | _ -> failwithf "problem #%d not solved yet" n
+let test2() =
+    ()
 
 let printHelp() =
     printfn "Program (-h | --help)"
@@ -56,7 +50,7 @@ let download n =
     use hdl = new Net.Http.HttpClientHandler()
     hdl.UseCookies <- false
     use cli = new Net.Http.HttpClient(hdl)
-    let uri = Uri(sprintf "https://adventofcode.com/2019/day/%d/input" n)
+    let uri = Uri(sprintf "https://adventofcode.com/2019/day/%s/input" n)
     use msg = new Net.Http.HttpRequestMessage(Net.Http.HttpMethod.Get, uri)
     let txt =
         async {
@@ -70,21 +64,37 @@ let download n =
                 failwithf "%A %s => %A" uri sess resp
             return! resp.Content.ReadAsStringAsync()
         } |> Async.RunSynchronously
-    let fname = sprintf "%d.in.txt" n
+    let fname = sprintf "%s.in.txt" n
     IO.File.WriteAllText(fname, txt)
 
+type Op(solve: (unit -> int), test: (unit -> unit)) =
+    member _.Solve = solve
+    member _.Test = test
+    
 [<EntryPoint>]
 let main argv =
-
-    let (|Int|_|) (s: string) =
-         let ok, n = Int32.TryParse s
-         if ok then Some(n) else None
+    let ops = dict[
+        "1", Op(solve1, test1)
+        "1+", Op(solve1', test1')
+        "2", Op(solve2, test2)
+    ]
 
     match argv with
     | [|"-h"|]
     | [|"--help"|] -> printHelp()
-    | [|Int n|] -> solve n
-    | [|"dl"; Int n|] -> download n
-    | [|"test"; Int n|] -> test n
+    | [|n|] ->
+        let ok, found = ops.TryGetValue n
+        if ok then
+            found.Solve() |> printfn "%d"
+        else
+            failwithf "problem #%s not solved yet" n
+    | [|"dl"; n|] -> download n
+    | [|"test"; n|] ->
+        let ok, found = ops.TryGetValue n
+        if ok then
+            found.Test()
+        else
+            failwithf "problem #%s not solved yet" n
+
     | _ -> failwithf "failed to parse: %A" argv
     0
